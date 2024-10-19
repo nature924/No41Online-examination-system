@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<!-- saved from url=(0014)about:internet -->
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>考试详情</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="renderer" content="webkit">
+    <link href="../../css/front-kaoshi-style.css" rel="stylesheet">
+</head>
+<body>
+<div id="app">
+    <div id="HOMEWORK-PC" style="position: relative;" class="Green-Theme">
+        <div class="Top-Test-Info fixed" style="top: 0px; z-index: 5;">
+            <div class="Test-Info-Left">
+                <h2>{{ headDate.exampaperName }}</h2>
+                <span>考试时常：{{ headDate.exampaperDate }}分钟</span>
+                <span>总分：{{ headDate.exampaperMyscore }}分</span>
+            </div>
+            <div class="Test-Info-Right">
+                <h2>{{ headDate.totalScore }}分</h2>
+            </div>
+        </div>
+
+        <div class="Test-Main-Container">
+            <div class="Test-Container">
+                <br class="Question-Type-Container">
+
+                <div v-for="(item,index) in dataList" :key="index" class="Subject-Description" id="Subject-a7f40d4d-69c4-4264-8fa8-3ca238aeb3ea">
+                    <!-- 序号栏 -->
+                    <div class="Column-Number">
+                        <div class="Column-Box">{{index+1}}</div>
+                        <p>{{item.examquestionValue}}</p>
+                        <p>{{item.examquestionScore}}分</p>
+                    </div>
+                    <!-- 试题区 -->
+                    <div class="Subject-Area">
+
+                        <div class="Subject-Title">{{ item.examquestionName }}?
+                        </div>
+                        <div>
+                            <ul class="Subject-Options" v-if="item.examquestionTypes == 1 || item.examquestionTypes == 3"><!--对 Item-Option Choosed 错 Item-Option celect-error-->
+                                <li v-for="(io,index) in item.examquestionOptions" :key="index" :class="
+                                item.examredetailsMyanswer == item.examquestionAnswer?
+                                    item.examredetailsMyanswer == io.code?
+                                        'Item-Option Choosed' :
+                                        'Item-Option'
+                                    :
+                                    item.examredetailsMyanswer == io.code?'Item-Option celect-error':'Item-Option'"> <i class="">{{ io.code }}</i>{{ io.text }}</li>
+                            </ul>
+                            <ul class="Subject-Options" v-if="item.examquestionTypes == 2"><!--对 Item-Option Choosed 错 Item-Option celect-error-->
+                                <li v-for="(io,index) in item.examquestionOptions" :key="index" :class="
+                                    item.examredetailsMyanswer == item.examquestionAnswer?
+                                        aaa(item.examredetailsMyanswer,io.code)?
+                                            'Item-Option Choosed'
+                                            :
+                                            'Item-Option'
+                                        :
+                                        aaa(item.examredetailsMyanswer,io.code)?
+                                            'Item-Option celect-error'
+                                            :
+                                            'Item-Option'"> <i class="">{{ io.code }}</i>{{ io.text }}</li>
+                            </ul>
+                        </div>
+
+                        <div class="Answer-Box">
+                            <div class="Student-Answer"><h3 style="margin: 7px 0;font-size: 15px;">我的得分：
+                                <span class="">{{ item.examredetailsMyscore }}分</span></h3></div>
+                            <h3 style="margin: 7px 0;font-size: 15px;">我的答案：
+                                <span class="">{{ item.examredetailsMyanswer }}</span></h3>
+                            <div class="Teacher-Answer"><h3 style="margin: 7px 0;font-size: 15px;">正确答案：
+                                <span class="answer-right-special">{{ item.examquestionAnswer }}</span></h3></div>
+                        </div>
+
+                        <div class="Analysis-Box">
+                            <button class="release">解析：</button>
+                            <div class="Analysis-Content">{{ item.examquestionAnalysis }}</div>
+                        </div>
+
+                    </div>
+                </div>
+
+                </br>
+                </br>
+                </br>
+                </br>
+                </br>
+                </br>
+                </br>
+                </br>
+                </br>
+                </br>
+                </br>
+                </br>
+
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+<!-- layui -->
+<script src="../../layui/layui.js"></script>
+<!-- vue -->
+<script src="../../js/vue.js"></script>
+<!-- 组件配置信息 -->
+<script src="../../js/config.js"></script>
+<!-- 扩展插件配置信息 -->
+<script src="../../modules/config.js"></script>
+<!-- 工具方法 -->
+<script src="../../js/utils.js"></script>
+
+<script>
+    var vue = new Vue({
+        el: '#app',
+        data: {
+            dataList: [],
+            headDate:{},
+        },
+        methods: {
+            jump(url) {
+                jump(url)
+            },
+            aaa(xuenzeString,code) {
+                if(xuenzeString.match(code)){
+                    return true;
+                }
+                return false;
+            },
+        }
+    })
+
+    layui.use(['layer', 'element', 'carousel', 'laypage', 'http', 'jquery'], function() {
+        var layer = layui.layer;
+        var element = layui.element;
+        var carousel = layui.carousel;
+        var laypage = layui.laypage;
+        var http = layui.http;
+        var jquery = layui.jquery;
+
+        var limit = 10;
+
+        //获取考卷信息
+        http.request('examrecord/info/'+http.getParam("id"), 'get', {}, function(res) {
+            vue.headDate = res.data
+        })
+
+        // 获取考题数据
+        http.request('examredetails/page', 'get', {
+            page: 1,
+            limit: limit,
+            examredetailsUuidNumber: http.getParam("examrecordUuidNumber"),
+            yonghuId: http.getParam("yonghuId"),
+        }, function(res) {
+            vue.dataList = res.data.list
+            vue.dataList.forEach(function (item,index){
+                if(item.examquestionTypes != 4){
+                    vue.dataList[index].examquestionOptions = JSON.parse(item.examquestionOptions)
+                }
+            });
+
+
+        })
+
+    });
+</script>
+
+</body>
+</html>

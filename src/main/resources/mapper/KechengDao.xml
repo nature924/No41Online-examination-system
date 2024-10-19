@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.KechengDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.laoshi_id as laoshiId
+        ,a.kecheng_uuid_number as kechengUuidNumber
+        ,a.kecheng_name as kechengName
+        ,a.kecheng_photo as kechengPhoto
+        ,a.kecheng_file as kechengFile
+        ,a.kecheng_video as kechengVideo
+        ,a.kemu_types as kemuTypes
+        ,a.kecheng_types as kechengTypes
+        ,a.kecheng_clicknum as kechengClicknum
+        ,a.kecheng_content as kechengContent
+        ,a.shangxia_types as shangxiaTypes
+        ,a.kecheng_delete as kechengDelete
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.KechengView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+        ,laoshi.laoshi_uuid_number as laoshiUuidNumber
+        ,laoshi.laoshi_name as laoshiName
+        ,laoshi.laoshi_phone as laoshiPhone
+        ,laoshi.laoshi_id_number as laoshiIdNumber
+        ,laoshi.laoshi_photo as laoshiPhoto
+        ,laoshi.laoshi_email as laoshiEmail
+
+        FROM kecheng  a
+        left JOIN laoshi laoshi ON a.laoshi_id = laoshi.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.laoshiId != null and params.laoshiId != ''">
+                and (
+                    a.laoshi_id = #{params.laoshiId}
+                )
+            </if>
+            <if test=" params.kechengUuidNumber != '' and params.kechengUuidNumber != null and params.kechengUuidNumber != 'null' ">
+                and a.kecheng_uuid_number like CONCAT('%',#{params.kechengUuidNumber},'%')
+            </if>
+            <if test=" params.kechengName != '' and params.kechengName != null and params.kechengName != 'null' ">
+                and a.kecheng_name like CONCAT('%',#{params.kechengName},'%')
+            </if>
+            <if test=" params.kechengVideo != '' and params.kechengVideo != null and params.kechengVideo != 'null' ">
+                and a.kecheng_video like CONCAT('%',#{params.kechengVideo},'%')
+            </if>
+            <if test="params.kemuTypes != null and params.kemuTypes != ''">
+                and a.kemu_types = #{params.kemuTypes}
+            </if>
+            <if test="params.kechengTypes != null and params.kechengTypes != ''">
+                and a.kecheng_types = #{params.kechengTypes}
+            </if>
+            <if test="params.kechengClicknumStart != null and params.kechengClicknumStart != ''">
+                <![CDATA[  and a.kecheng_clicknum >= #{params.kechengClicknumStart}   ]]>
+            </if>
+            <if test="params.kechengClicknumEnd != null and params.kechengClicknumEnd != ''">
+                <![CDATA[  and a.kecheng_clicknum <= #{params.kechengClicknumEnd}   ]]>
+            </if>
+             <if test="params.kechengClicknum != null and params.kechengClicknum != ''">
+                and a.kecheng_clicknum = #{params.kechengClicknum}
+             </if>
+            <if test=" params.kechengContent != '' and params.kechengContent != null and params.kechengContent != 'null' ">
+                and a.kecheng_content like CONCAT('%',#{params.kechengContent},'%')
+            </if>
+            <if test="params.shangxiaTypes != null and params.shangxiaTypes != ''">
+                and a.shangxia_types = #{params.shangxiaTypes}
+            </if>
+            <if test="params.kechengDeleteStart != null and params.kechengDeleteStart != ''">
+                <![CDATA[  and a.kecheng_delete >= #{params.kechengDeleteStart}   ]]>
+            </if>
+            <if test="params.kechengDeleteEnd != null and params.kechengDeleteEnd != ''">
+                <![CDATA[  and a.kecheng_delete <= #{params.kechengDeleteEnd}   ]]>
+            </if>
+             <if test="params.kechengDelete != null and params.kechengDelete != ''">
+                and a.kecheng_delete = #{params.kechengDelete}
+             </if>
+
+                <!-- 判断老师的id不为空 -->
+            <if test=" params.laoshiIdNotNull != '' and params.laoshiIdNotNull != null and params.laoshiIdNotNull != 'null' ">
+                and a.laoshi_id IS NOT NULL
+            </if>
+            <if test=" params.laoshiUuidNumber != '' and params.laoshiUuidNumber != null and params.laoshiUuidNumber != 'null' ">
+                and laoshi.laoshi_uuid_number like CONCAT('%',#{params.laoshiUuidNumber},'%')
+            </if>
+            <if test=" params.laoshiName != '' and params.laoshiName != null and params.laoshiName != 'null' ">
+                and laoshi.laoshi_name like CONCAT('%',#{params.laoshiName},'%')
+            </if>
+            <if test=" params.laoshiPhone != '' and params.laoshiPhone != null and params.laoshiPhone != 'null' ">
+                and laoshi.laoshi_phone like CONCAT('%',#{params.laoshiPhone},'%')
+            </if>
+            <if test=" params.laoshiIdNumber != '' and params.laoshiIdNumber != null and params.laoshiIdNumber != 'null' ">
+                and laoshi.laoshi_id_number like CONCAT('%',#{params.laoshiIdNumber},'%')
+            </if>
+            <if test=" params.laoshiEmail != '' and params.laoshiEmail != null and params.laoshiEmail != 'null' ">
+                and laoshi.laoshi_email like CONCAT('%',#{params.laoshiEmail},'%')
+            </if>
+        </where>
+
+        order by a.${params.orderBy} desc 
+    </select>
+
+</mapper>
